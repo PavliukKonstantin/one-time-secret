@@ -1,3 +1,7 @@
+# requests
+gen_secret_key.http
+get_secret.http
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
