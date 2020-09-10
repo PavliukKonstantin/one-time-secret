@@ -1,7 +1,14 @@
 from pydantic import BaseModel
 
 
-# TODO add max_length in validation???
+class SecretKey(BaseModel):
+    secret_key: str
+
+
+class SecretPhrase(BaseModel):
+    secret_phrase: str
+
+
 class CreateSecret(BaseModel):
     secret_phrase: str
     code_phrase: str

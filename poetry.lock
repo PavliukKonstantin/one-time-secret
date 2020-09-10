@@ -96,6 +96,23 @@ test = ["pytest (>=3.6.0,<3.9.0 || >3.9.0,<3.9.1 || >3.9.1,<3.9.2 || >3.9.2)", "
 
 [[package]]
 category = "main"
+description = "Async database support for Python."
+name = "databases"
+optional = false
+python-versions = ">=3.6"
+version = "0.3.2"
+
+[package.dependencies]
+sqlalchemy = "*"
+
+[package.extras]
+mysql = ["aiomysql", "pymysql"]
+postgresql = ["asyncpg", "psycopg2-binary"]
+postgresql_aiopg = ["aiopg"]
+sqlite = ["aiosqlite"]
+
+[[package]]
+category = "main"
 description = "FastAPI framework, high performance, easy to learn, fast to code, ready for production"
 name = "fastapi"
 optional = false
@@ -446,7 +463,7 @@ python-versions = ">=3.6.1"
 version = "8.1"
 
 [metadata]
-content-hash = "5397cab829f75bc2c9e388120379ae0dd436f1dd50eae58be1ba6eec32a775a8"
+content-hash = "73270fced2207f08e70d86211aa4861f269650f5052e714fa0f6938be5c809a7"
 python-versions = "^3.8"
 
 [metadata.files]
@@ -525,6 +542,10 @@ cryptography = [
     {file = "cryptography-3.1-cp38-cp38-win32.whl", hash = "sha256:fa7fbcc40e2210aca26c7ac8a39467eae444d90a2c346cbcffd9133a166bcc67"},
     {file = "cryptography-3.1-cp38-cp38-win_amd64.whl", hash = "sha256:548b0818e88792318dc137d8b1ec82a0ab0af96c7f0603a00bb94f896fbf5e10"},
     {file = "cryptography-3.1.tar.gz", hash = "sha256:26409a473cc6278e4c90f782cd5968ebad04d3911ed1c402fc86908c17633e08"},
+]
+databases = [
+    {file = "databases-0.3.2-py3-none-any.whl", hash = "sha256:ee8dcece15a86359ef06414a6afcc15da15f5d078dc09af2e3a5f9dbfee4dce9"},
+    {file = "databases-0.3.2.tar.gz", hash = "sha256:78b758884ca585b81272af1de697e0c8a3034de92bdd08e9ac47436ef0cdca56"},
 ]
 fastapi = [
     {file = "fastapi-0.61.1-py3-none-any.whl", hash = "sha256:6cc31bb555dd8ca956d1d227477d661e4ac012337242a41d36214ffbda78bfe9"},
