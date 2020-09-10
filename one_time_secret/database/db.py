@@ -1,8 +1,7 @@
 import os
 
-from sqlalchemy import create_engine
+import databases
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
 
 db_user = os.getenv("POSTGRES_USER", "db_user")
 db_password = os.getenv("POSTGRES_PASSWORD", "db_password")
@@ -13,8 +12,6 @@ SQLALCHEMY_DATABASE_URL = (
     f"postgresql://{db_user}:{db_password}@{db_host}/{db_name}"
 )
 
-engine = create_engine(SQLALCHEMY_DATABASE_URL)
-
-DatabaseSession = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+database = databases.Database(SQLALCHEMY_DATABASE_URL)
 
 Base = declarative_base()
