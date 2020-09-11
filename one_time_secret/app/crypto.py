@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import base64
 import binascii
 import os
@@ -8,7 +10,17 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
 
-def _get_key(code_phrase, salt):
+def _get_key(code_phrase: bytes, salt: bytes) -> bytes:
+    """
+    Get encryption key.
+
+    Args:
+        code_phrase (bytes): code phrase for generating an encryption key.
+        salt (bytes): salt for generating an encryption key.
+
+    Returns:
+        bytes: encryption key.
+    """
     kdf = PBKDF2HMAC(
         algorithm=hashes.SHA256(),
         length=32,
@@ -19,12 +31,26 @@ def _get_key(code_phrase, salt):
 
 
 def _get_salt():
+    """
+    Get random generated 32 bytes.
+
+    Returns:
+        bytes: random generated 32 bytes.
+    """
     return os.urandom(16)
 
 
-# TODO add func that will encrypt secret_phrase and code phrase
-# add salt
-def encrypt(secret_phrase, code_phrase):
+def encrypt(secret_phrase: str, code_phrase: str) -> tuple:
+    """
+    Encrypt secret and code phrase.
+
+    Args:
+        secret_phrase (str): secret phrase that will be encrypt.
+        code_phrase (str): code phrase that will be encrypt.
+
+    Returns:
+        tuple: encrypted secret phrase, encrypted code phrase, salt
+    """
     salt = _get_salt()
     encryption_key = _get_key(code_phrase.encode(), salt)
     cipher_suite = Fernet(encryption_key)
@@ -37,7 +63,25 @@ def encrypt(secret_phrase, code_phrase):
     )
 
 
-def decrypt_secret_phrase(code_phrase, encrypted_secret_phrase, salt):
+def decrypt_secret_phrase(
+    code_phrase: str,
+    encrypted_secret_phrase: str,
+    salt: str,
+) -> str:
+    """
+    Decrypt secret phrase.
+
+    Args:
+        code_phrase (str): code phrase for generating an decryption key.
+        encrypted_secret_phrase (str): encrypted secret phrase.
+        salt (str): salt for generating an decryption key.
+
+    Raises:
+        InvalidToken: if code phrase is incorrect.
+
+    Returns:
+        str: decrypted secret phrase.
+    """
     encryption_key = _get_key(
         code_phrase.encode(),
         binascii.unhexlify(salt.encode()),
