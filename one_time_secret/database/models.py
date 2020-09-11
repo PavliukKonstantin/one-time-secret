@@ -16,7 +16,8 @@ class Secret(Base):
     secret_phrase = Column(Text, nullable=False)
     code_phrase = Column(Text, nullable=False)
     salt = Column(String(32), nullable=False)
-    creation_date_time = Column(DateTime)
+    creation_datetime = Column(DateTime, nullable=False)
+    deletion_datetime = Column(DateTime, nullable=False)
 
 
 secrets = Secret.__table__

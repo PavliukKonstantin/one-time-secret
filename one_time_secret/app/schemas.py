@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, PositiveInt
 
 
 class SecretKey(BaseModel):
@@ -12,6 +12,7 @@ class SecretPhrase(BaseModel):
 class CreateSecret(BaseModel):
     secret_phrase: str
     code_phrase: str
+    ttl: PositiveInt = PositiveInt(86400)
 
 
 class GetSecret(BaseModel):

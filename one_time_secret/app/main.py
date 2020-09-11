@@ -1,8 +1,11 @@
+from datetime import datetime
+
 from cryptography.fernet import InvalidToken
 from fastapi import FastAPI, HTTPException
+from fastapi_utils.tasks import repeat_every
 
 from one_time_secret.app import crud, crypto, schemas
-from one_time_secret.database.db import database  # DatabaseSession,
+from one_time_secret.database.db import database
 
 app = FastAPI()
 
@@ -15,6 +18,12 @@ async def startup():
 @app.on_event("shutdown")
 async def shutdown():
     await database.disconnect()
+
+
+@app.on_event("startup")
+@repeat_every(seconds=3600, wait_first=True)
+async def delete_outdated_secrets():
+    await crud.db_delete_outdated_secrets()
 
 
 # TODO add method generate, ?secret=some_secret&code_phrase=some_phrase
@@ -42,7 +51,16 @@ async def get_secret(
     if secret_row is None:
         raise HTTPException(
             status_code=404,
-            detail="Secret key does not exist",
+            detail=("Secret key does not exist or "
+                    "deleted because the is over"),
+        )
+
+    if datetime.utcnow() > secret_row.get("deletion_datetime"):
+        await crud.db_delete_secret(secret_key=secret_key)
+        raise HTTPException(
+            status_code=404,
+            detail=("Secret key does not exist or "
+                    "deleted because ttl is over"),
         )
 
     try:
@@ -52,10 +70,7 @@ async def get_secret(
             salt=secret_row.get("salt"),
         )
     except InvalidToken:
-        raise HTTPException(
-            status_code=400,
-            detail="Incorrect code phrase",
-        )
+        raise HTTPException(status_code=400, detail="Incorrect code phrase")
     # TODO uncomment after testing
     # await crud.db_delete_secret(secret_key=secret_key)
     return {"secret_phrase": decrypted_secret_phrase}

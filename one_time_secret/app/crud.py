@@ -1,18 +1,9 @@
-import uuid
-from datetime import datetime
 from typing import Optional
+from datetime import datetime
 
-from one_time_secret.app import crypto, schemas
+from one_time_secret.app import crypto, schemas, service
 from one_time_secret.database.db import database
 from one_time_secret.database.models import secrets
-
-
-def _generate_secret_key() -> str:
-    return str(uuid.uuid4().hex)
-
-
-def _generate_timestamp() -> datetime:
-    return datetime.utcnow()
 
 
 # TODO add func that write row in db
@@ -23,13 +14,17 @@ async def db_create_secret(
         create_secret_body.secret_phrase,
         create_secret_body.code_phrase,
     )
+    creation_datetime = service.generate_creation_datetime()
+    ttl = service.generate_ttl(create_secret_body.ttl)
+    deletion_datetime = creation_datetime + ttl
     # TODO think about variable name "query"
     query = secrets.insert().values(
-        secret_key=_generate_secret_key(),
+        secret_key=service.generate_secret_key(),
         secret_phrase=encrypted_secret_phrase,
         code_phrase=encrypted_code_phrase,
         salt=salt,
-        creation_date_time=_generate_timestamp(),
+        creation_datetime=creation_datetime,
+        deletion_datetime=deletion_datetime,
     )
     # TODO think about add try except here
     await database.execute(query)
@@ -49,4 +44,10 @@ async def db_get_secret_row(secret_key: str) -> Optional[dict]:
 async def db_delete_secret(secret_key: str) -> None:
     query = secrets.delete().where(secrets.c.secret_key == secret_key)
     # TODO think about add try except here
+    await database.execute(query)
+
+
+async def db_delete_outdated_secrets() -> None:
+    query = secrets.delete().\
+        where(secrets.c.deletion_datetime < datetime.utcnow())
     await database.execute(query)
