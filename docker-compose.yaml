@@ -1,0 +1,26 @@
+version: "3.8"
+
+services:
+    db:
+        image: postgres:12.3-alpine
+        volumes:
+            - postgres_data:/var/lib/postgresql/data/
+        env_file:
+            - .env
+
+    api:
+        build:
+            context: ./one_time_secret
+            dockerfile: Dockerfile
+        command: |
+            gunicorn -w 4 -k uvicorn.workers.UvicornWorker
+            --chdir /home/app/one_time_secret/app main:app --bind 0.0.0.0:8000
+        ports:
+            - 8000:8000
+        env_file:
+            - .env
+        depends_on:
+            - db
+
+volumes:
+    postgres_data:
