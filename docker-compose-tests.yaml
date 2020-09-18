@@ -1,0 +1,36 @@
+version: "3.8"
+
+# For tests
+services:
+    test_db:
+        image: postgres:12.3-alpine
+        volumes:
+            - test_postgres_data:/var/lib/postgresql/data/
+        environment:
+            - POSTGRES_DB=test_secrets
+            - POSTGRES_USER=database_user
+            - POSTGRES_PASSWORD=database_password
+        ports:
+            - 54322:5432
+
+    test_api:
+        build:
+            context: ./one_time_secret
+            dockerfile: Dockerfile
+        command: |
+            gunicorn -w 1 -k uvicorn.workers.UvicornWorker
+            --chdir /home/app/one_time_secret/app main:app --bind 0.0.0.0:9123
+        ports:
+            - 9123:9123
+        environment:
+            - POSTGRES_DB=test_secrets
+            - POSTGRES_USER=database_user
+            - POSTGRES_PASSWORD=database_password
+            - POSTGRES_HOST=test_db
+            - POSTGRES_PORT=5432
+            - POSTGRES_DATABASE=postgres
+        depends_on:
+            - test_db
+
+volumes:
+    test_postgres_data:
