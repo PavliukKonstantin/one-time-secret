@@ -1,33 +1,34 @@
-# -*- coding: utf-8 -*-
-
 from typing import Optional
+
+from sqlalchemy import select, delete, insert
 
 from one_time_secret.app import crypto, schemas, service
 from one_time_secret.database.db import database
 from one_time_secret.database.models import secrets
 
 
-async def db_create_secret(create_secret_body: schemas.CreateSecret) -> dict:
+async def db_create_secret(request_body: schemas.CreateSecret) -> dict:
     """
     Create one secret in database.
 
     Args:
-        create_secret_body (schemas.CreateSecret): validation schema.
+        request_body (schemas.CreateSecret): validation schema.
             Look description in schemas.CreateSecret.
 
     Returns:
         dict: fields of the created secret.
     """
-    encrypted_secret_phrase, encrypted_code_phrase, salt = crypto.encrypt(
-        create_secret_body.secret_phrase,
-        create_secret_body.code_phrase,
+    encripted_phrases = crypto.encrypt_phrases(
+        request_body.secret_phrase,
+        request_body.code_phrase,
     )
+    encrypted_secret_phrase, encrypted_code_phrase, salt = encripted_phrases
 
     creation_datetime = service.get_current_datetime()
-    ttl = service.generate_ttl(create_secret_body.ttl)
+    ttl = service.generate_ttl(request_body.ttl)
     deletion_datetime = creation_datetime + ttl
 
-    created_secret = secrets.insert().values(
+    query = insert(table=secrets).values(
         secret_key=service.generate_secret_key(),
         secret_phrase=encrypted_secret_phrase,
         code_phrase=encrypted_code_phrase,
@@ -35,12 +36,11 @@ async def db_create_secret(create_secret_body: schemas.CreateSecret) -> dict:
         creation_datetime=creation_datetime,
         deletion_datetime=deletion_datetime,
     )
-    # TODO think about add try except here
-    await database.execute(created_secret)
-    return created_secret.parameters
+    await database.execute(query=query)
+    return query.parameters
 
 
-async def db_get_secret_row(secret_key: str) -> Optional[dict]:
+async def db_get_one_row(secret_key: str) -> Optional[dict]:
     """
     Get one secret row from database.
 
@@ -51,30 +51,27 @@ async def db_get_secret_row(secret_key: str) -> Optional[dict]:
         Optional[dict]: fields one secret row.
             If secret key does not exist return 'None'.
     """
-    query = secrets.select().\
-        where(secrets.c.secret_key == secret_key)
-    # TODO think about add try except here
+
+    query = select([secrets]).where(secrets.c.secret_key == secret_key)
     secret_row = await database.fetch_one(query=query)
     if secret_row is not None:
         return dict(secret_row)
     return None
 
 
-async def db_delete_secret(secret_key: str) -> None:
+async def db_delete_one_row(secret_key: str) -> None:
     """
     Delete one secret in database.
 
     Args:
         secret_key (str): secret key.
     """
-    query = secrets.delete().where(secrets.c.secret_key == secret_key)
-    # TODO think about add try except here
-    await database.execute(query)
+    query = delete(table=secrets).where(secrets.c.secret_key == secret_key)
+    await database.execute(query=query)
 
 
 async def db_delete_outdated_secrets() -> None:
     """Delete outdated secrets."""
-    query = secrets.delete().\
+    query = delete(table=secrets).\
         where(secrets.c.deletion_datetime < service.get_current_datetime())
-    # TODO think about add try except here
-    await database.execute(query)
+    await database.execute(query=query)
