@@ -1,17 +1,18 @@
-# -*- coding: utf-8 -*-
-
 import os
 
 import databases
 from sqlalchemy.ext.declarative import declarative_base
 
-db_user = os.getenv("POSTGRES_USER", "db_user")
-db_password = os.getenv("POSTGRES_PASSWORD", "db_password")
-db_host = os.getenv("POSTGRES_HOST", "localhost")
-db_name = os.getenv("POSTGRES_DB", "secrets")
+# Default values used for "./tests/test_app_crud/"
+POSTGRES_USER = os.getenv("POSTGRES_USER", "database_user")
+POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", "database_password")
+POSTGRES_HOST = os.getenv("POSTGRES_HOST", "localhost")
+POSTGRES_PORT = os.getenv("POSTGRES_PORT", "54322")
+POSTGRES_DB = os.getenv("POSTGRES_DB", "test_secrets")
 
 SQLALCHEMY_DATABASE_URL = (
-    f"postgresql://{db_user}:{db_password}@{db_host}/{db_name}"
+    f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@"
+    f"{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}"
 )
 
 database = databases.Database(SQLALCHEMY_DATABASE_URL)

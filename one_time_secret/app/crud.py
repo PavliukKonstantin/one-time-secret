@@ -51,7 +51,6 @@ async def db_get_one_row(secret_key: str) -> Optional[dict]:
         Optional[dict]: fields one secret row.
             If secret key does not exist return 'None'.
     """
-
     query = select([secrets]).where(secrets.c.secret_key == secret_key)
     secret_row = await database.fetch_one(query=query)
     if secret_row is not None:

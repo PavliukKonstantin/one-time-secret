@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from sqlalchemy import Column, DateTime, String, Text
 
 from one_time_secret.database.db import Base
@@ -7,6 +5,7 @@ from one_time_secret.database.db import Base
 
 class Secret(Base):
     """Model for 'secret' table."""
+
     __tablename__ = "secret"
 
     secret_key = Column(

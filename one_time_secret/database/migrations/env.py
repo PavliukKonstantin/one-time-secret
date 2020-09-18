@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from logging.config import fileConfig
 
 from alembic import context

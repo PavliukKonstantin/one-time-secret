@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import base64
 import binascii
 import os
@@ -40,7 +38,7 @@ def _get_salt():
     return os.urandom(16)
 
 
-def encrypt(secret_phrase: str, code_phrase: str) -> tuple:
+def encrypt_phrases(secret_phrase: str, code_phrase: str) -> tuple:
     """
     Encrypt secret and code phrase.
 
